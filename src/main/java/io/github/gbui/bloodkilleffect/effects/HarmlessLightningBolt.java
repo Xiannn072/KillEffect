@@ -21,6 +21,11 @@ public class HarmlessLightningBolt extends EntityLightningBolt {
             this.worldObj.playSoundEffect(this.posX, this.posY, this.posZ,
                 "ambient.weather.thunder", 10000F, 0.8F + this.rand.nextFloat() * 0.2F);
         }
+
+        // Update boltVertex so the vanilla renderer (RenderLightningBolt) animates
+        // the lightning shape each tick instead of rendering a static line.
+        this.boltVertex = this.rand.nextLong();
+
         if (++this.ticksExisted >= 8) {
             this.setDead();
         }

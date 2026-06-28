@@ -1,6 +1,8 @@
 package io.github.gbui.bloodkilleffect;
 
+import io.github.gbui.bloodkilleffect.event.KillEffectClientHandler;
 import io.github.gbui.bloodkilleffect.gui.BKEGuiConfig;
+import io.github.gbui.bloodkilleffect.network.KillEffectMessage;
 import net.minecraft.client.Minecraft;
 import net.minecraftforge.client.ClientCommandHandler;
 import net.minecraftforge.common.MinecraftForge;
@@ -36,5 +38,16 @@ public class ClientProxy extends CommonProxy {
     public void openConfigGui() {
         Minecraft.getMinecraft().displayGuiScreen(
             new BKEGuiConfig(Minecraft.getMinecraft().currentScreen));
+    }
+
+    /**
+     * Client override: schedules kill-effect playback on the main client thread.
+     */
+    @Override
+    public void handleKillEffectPacket(KillEffectMessage msg) {
+        Minecraft.getMinecraft().addScheduledTask(() -> {
+            KillEffectClientHandler.handleServerPacket(
+                msg.getX(), msg.getY(), msg.getZ(), msg.getEntityId());
+        });
     }
 }

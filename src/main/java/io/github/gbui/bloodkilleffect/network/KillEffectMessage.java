@@ -1,11 +1,10 @@
 package io.github.gbui.bloodkilleffect.network;
 
+import io.github.gbui.bloodkilleffect.BloodKillEffectMod;
 import io.netty.buffer.ByteBuf;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 /**
  * Packet sent from server → client to trigger a kill effect at specific coordinates.
@@ -50,17 +49,14 @@ public class KillEffectMessage implements IMessage {
     public int getEntityId() { return entityId; }
 
     /**
-     * Client-side handler. Schedules effect playback on the main client thread.
+     * Network handler. Routes through the proxy to avoid loading client-only classes
+     * on the dedicated server (which would cause NoClassDefFoundError at class-load time).
      */
     public static class Handler implements IMessageHandler<KillEffectMessage, IMessage> {
         @Override
-        @SideOnly(Side.CLIENT)
         public IMessage onMessage(KillEffectMessage msg, MessageContext ctx) {
-            // Schedule on the client main thread to be thread-safe
-            net.minecraft.client.Minecraft.getMinecraft().addScheduledTask(() -> {
-                io.github.gbui.bloodkilleffect.event.KillEffectClientHandler
-                    .handleServerPacket(msg.getX(), msg.getY(), msg.getZ());
-            });
+            // Delegate to proxy — server-side no-op, client-side schedules on main thread
+            BloodKillEffectMod.proxy.handleKillEffectPacket(msg);
             return null;
         }
     }

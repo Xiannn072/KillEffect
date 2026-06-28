@@ -14,10 +14,6 @@ import net.minecraftforge.fml.client.config.IConfigElement;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Forge config GUI for KillEffect.
- * Displays all configurable options grouped into General, Effects, and Performance categories.
- */
 public class BKEGuiConfig extends GuiConfig {
 
     public BKEGuiConfig(GuiScreen parent) {
@@ -29,7 +25,6 @@ public class BKEGuiConfig extends GuiConfig {
         List<IConfigElement> list = new ArrayList<>();
         Configuration cfg = ConfigManager.get().getConfig();
 
-        // ── General category ──────────────────────────────────────────────
         list.add(new ConfigElement(cfg.get(Configuration.CATEGORY_GENERAL,
                 "enabled", true,
                 "Enable or disable all kill effects")));
@@ -43,14 +38,12 @@ public class BKEGuiConfig extends GuiConfig {
                 "pvpOnly", false,
                 "Only show effects for player-vs-player kills")));
 
-        // ── Effects category ──────────────────────────────────────────────
         Property selectedProp = cfg.get(ConfigManager.CATEGORY_EFFECTS, "selectedEffect", "Blood",
                 "Selected effect name (used when random mode is off)");
         selectedProp.setValidValues(
                 EffectRegistry.getAllNames().toArray(new String[0]));
         list.add(new ConfigElement(cfg.getCategory(ConfigManager.CATEGORY_EFFECTS)));
 
-        // ── Performance category ──────────────────────────────────────────
         Property tierProp = cfg.get(ConfigManager.CATEGORY_PERFORMANCE, "tier",
                 PerformanceTier.BALANCED.name(),
                 "Performance tier: POTATO, BALANCED, HIGH, ULTRA");

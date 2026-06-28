@@ -1,5 +1,6 @@
 package io.github.gbui.bloodkilleffect;
 
+import io.github.gbui.bloodkilleffect.network.KillEffectMessage;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
@@ -21,4 +22,10 @@ public class CommonProxy {
      * Server-side no-op. The client override opens the actual GUI.
      */
     public void openConfigGui() { }
+
+    /**
+     * Server-side no-op for kill-effect packets. The client override schedules
+     * effect playback on the main thread.
+     */
+    public void handleKillEffectPacket(KillEffectMessage msg) { }
 }

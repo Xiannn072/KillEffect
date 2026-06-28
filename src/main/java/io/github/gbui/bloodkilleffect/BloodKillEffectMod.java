@@ -55,12 +55,6 @@ public class BloodKillEffectMod {
     private void registerEffects() {
         EffectRegistry.register(new BloodEffect());
         EffectRegistry.register(new LightningEffect());
-        EffectRegistry.register(new FireBurstEffect());
-        EffectRegistry.register(new SmokeEffect());
-        EffectRegistry.register(new SoulEffect());
-        EffectRegistry.register(new ExplosionEffect());
-        EffectRegistry.register(new PoisonEffect());
-        EffectRegistry.register(new IceEffect());
     }
 
     @EventHandler

@@ -6,10 +6,6 @@ import io.github.gbui.bloodkilleffect.KillEffect;
 import io.github.gbui.bloodkilleffect.PerformanceTier;
 import net.minecraftforge.common.config.Configuration;
 
-/**
- * Singleton configuration manager. THE single source of truth for all config values.
- * BloodKillEffectMod static fields are removed; all code reads via ConfigManager.get().
- */
 public class ConfigManager {
     private static ConfigManager instance;
 
@@ -32,8 +28,6 @@ public class ConfigManager {
         return instance;
     }
 
-    // ── Load ──────────────────────────────────────────────────────────────
-
     public void load(Configuration cfg) {
         this.config = cfg;
         config.load();
@@ -54,7 +48,6 @@ public class ConfigManager {
                     new String[]{PerformanceTier.POTATO.name(), PerformanceTier.BALANCED.name(),
                                  PerformanceTier.HIGH.name(), PerformanceTier.ULTRA.name()}));
 
-        // Validate selected effect against registry and tier
         if (!randomMode) {
             KillEffect effect = EffectRegistry.get(selectedEffect);
             if (effect == null || !effect.isAllowedInTier(performanceTier)) {
@@ -68,16 +61,12 @@ public class ConfigManager {
         }
     }
 
-    // ── Save ──────────────────────────────────────────────────────────────
-
     public void save() {
         if (config == null) return;
         if (config.hasChanged()) {
             config.save();
         }
     }
-
-    // ── Individual setters (update cached value + config file + save) ─────
 
     public void setEnabled(boolean val) {
         this.enabled = val;
@@ -121,8 +110,6 @@ public class ConfigManager {
         save();
     }
 
-    // ── Getters ───────────────────────────────────────────────────────────
-
     public Configuration getConfig() { return config; }
     public boolean isEnabled()           { return enabled; }
     public boolean isPlayersOnly()       { return playersOnly; }
@@ -132,7 +119,6 @@ public class ConfigManager {
     public String  getSelectedEffect()   { return selectedEffect; }
     public PerformanceTier getPerformanceTier() { return performanceTier; }
 
-    // ── Category constants (public for use in BKEGuiConfig) ──────────────
     public static final String CATEGORY_EFFECTS     = "Effects";
     public static final String CATEGORY_PERFORMANCE = "Performance";
 }

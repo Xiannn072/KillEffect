@@ -15,7 +15,7 @@ public class KillEffectCommand extends CommandBase {
 
     @Override
     public String getCommandUsage(ICommandSender sender) {
-        return "/killeffect <toggle|effect|random|tier|players|mykills|pvp|list|config>";
+        return "/killeffect <toggle|effect|random|tier|list|config>";
     }
 
     @Override
@@ -56,24 +56,6 @@ public class KillEffectCommand extends CommandBase {
                 sender.addChatMessage(new ChatComponentText("Random mode enabled"));
                 break;
 
-            case "players":
-                cfg.setPlayersOnly(!cfg.isPlayersOnly());
-                sender.addChatMessage(new ChatComponentText(
-                    "Players only: " + (cfg.isPlayersOnly() ? "ON" : "OFF")));
-                break;
-
-            case "mykills":
-                cfg.setKilledByPlayerOnly(!cfg.isKilledByPlayerOnly());
-                sender.addChatMessage(new ChatComponentText(
-                    "My kills only: " + (cfg.isKilledByPlayerOnly() ? "ON" : "OFF")));
-                break;
-
-            case "pvp":
-                cfg.setPvpOnly(!cfg.isPvpOnly());
-                sender.addChatMessage(new ChatComponentText(
-                    "PvP only: " + (cfg.isPvpOnly() ? "ON" : "OFF")));
-                break;
-
             case "tier":
                 if (args.length < 2) {
                     sender.addChatMessage(new ChatComponentText("Usage: /killeffect tier <name>"));
@@ -98,7 +80,6 @@ public class KillEffectCommand extends CommandBase {
                 break;
 
             case "config":
-                // Open the config GUI directly (client-side command)
                 BloodKillEffectMod.proxy.openConfigGui();
                 break;
 
@@ -115,7 +96,7 @@ public class KillEffectCommand extends CommandBase {
     public List<String> addTabCompletionOptions(ICommandSender sender, String[] args, BlockPos pos) {
         if (args.length == 1) {
             return getListOfStringsMatchingLastWord(args,
-                "toggle", "effect", "random", "tier", "players", "mykills", "pvp", "list", "config");
+                "toggle", "effect", "random", "tier", "list", "config");
         }
         if (args.length == 2) {
             if (args[0].equalsIgnoreCase("effect")) {
