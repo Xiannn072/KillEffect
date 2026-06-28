@@ -2,15 +2,13 @@ package io.github.gbui.bloodkilleffect;
 
 import io.github.gbui.bloodkilleffect.config.ConfigManager;
 import io.github.gbui.bloodkilleffect.effects.*;
-import io.github.gbui.bloodkilleffect.event.KillEffectEventHandler;
-import net.minecraftforge.common.MinecraftForge;
+import io.github.gbui.bloodkilleffect.network.KillEffectNetwork;
 import net.minecraftforge.common.config.Configuration;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.Mod.EventHandler;
+import net.minecraftforge.fml.common.SidedProxy;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
-import net.minecraftforge.fml.common.event.FMLServerStartingEvent;
-import net.minecraftforge.client.ClientCommandHandler;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -28,16 +26,12 @@ public class BloodKillEffectMod {
     @Mod.Instance(MODID)
     public static BloodKillEffectMod instance;
 
-    public static Configuration config;
+    @SidedProxy(
+        clientSide = "io.github.gbui.bloodkilleffect.ClientProxy",
+        serverSide = "io.github.gbui.bloodkilleffect.CommonProxy")
+    public static CommonProxy proxy;
 
-    // ── Shared config state (kept as static fields for backward compat) ───
-    public static boolean enabled = true;
-    public static boolean playersOnly = true;
-    public static boolean killedByPlayerOnly = false;
-    public static boolean pvpOnly = false;
-    public static boolean randomMode = true;
-    public static String selectedEffect = "Blood";
-    public static PerformanceTier performanceTier = PerformanceTier.BALANCED;
+    public static Configuration config;
 
     // ── Lifecycle ─────────────────────────────────────────────────────────
 
@@ -47,10 +41,15 @@ public class BloodKillEffectMod {
 
         config = new Configuration(event.getSuggestedConfigurationFile());
         registerEffects();
+        EffectRegistry.buildCaches();
         ConfigManager.get().load(config);
 
+        // Register network channel on both physical sides
+        KillEffectNetwork.register();
+
+        ConfigManager cfg = ConfigManager.get();
         logger.info("KillEffect config loaded: enabled={}, tier={}, randomMode={}",
-            enabled, performanceTier.getDisplayName(), randomMode);
+            cfg.isEnabled(), cfg.getPerformanceTier().getDisplayName(), cfg.isRandomMode());
     }
 
     private void registerEffects() {
@@ -66,23 +65,7 @@ public class BloodKillEffectMod {
 
     @EventHandler
     public void init(FMLInitializationEvent event) {
-        MinecraftForge.EVENT_BUS.register(new KillEffectEventHandler());
-        ClientCommandHandler.instance.registerCommand(new KillEffectCommand());
-        logger.info("KillEffect initialized — event handler registered");
+        proxy.init(event);
+        logger.info("KillEffect initialized");
     }
-
-    @EventHandler
-    public void serverStarting(FMLServerStartingEvent event) {
-        event.registerServerCommand(new KillEffectCommand());
-    }
-
-    // ── Convenience setters (delegate to ConfigManager) ───────────────────
-
-    public void setEnabled(boolean val)            { ConfigManager.get().setEnabled(val); }
-    public void setPlayersOnly(boolean val)        { ConfigManager.get().setPlayersOnly(val); }
-    public void setKilledByPlayerOnly(boolean val) { ConfigManager.get().setKilledByPlayerOnly(val); }
-    public void setPvpOnly(boolean val)            { ConfigManager.get().setPvpOnly(val); }
-    public void setRandomMode(boolean val)         { ConfigManager.get().setRandomMode(val); }
-    public void setSelectedEffect(String name)     { ConfigManager.get().setSelectedEffect(name); }
-    public void setPerformanceTier(PerformanceTier t) { ConfigManager.get().setPerformanceTier(t); }
 }

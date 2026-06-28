@@ -1,9 +1,12 @@
 package io.github.gbui.bloodkilleffect;
 
+import io.github.gbui.bloodkilleffect.config.ConfigManager;
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.ICommandSender;
+import net.minecraft.util.BlockPos;
 import net.minecraft.util.ChatComponentText;
-import java.util.ArrayList;
+
+import java.util.Collections;
 import java.util.List;
 
 public class KillEffectCommand extends CommandBase {
@@ -22,14 +25,14 @@ public class KillEffectCommand extends CommandBase {
             return;
         }
 
-        BloodKillEffectMod mod = BloodKillEffectMod.instance;
+        ConfigManager cfg = ConfigManager.get();
         String subCommand = args[0].toLowerCase();
 
         switch (subCommand) {
             case "toggle":
-                mod.setEnabled(!BloodKillEffectMod.enabled);
+                cfg.setEnabled(!cfg.isEnabled());
                 sender.addChatMessage(new ChatComponentText(
-                    "KillEffect " + (BloodKillEffectMod.enabled ? "enabled" : "disabled")));
+                    "KillEffect " + (cfg.isEnabled() ? "enabled" : "disabled")));
                 break;
 
             case "effect":
@@ -43,32 +46,32 @@ public class KillEffectCommand extends CommandBase {
                     sender.addChatMessage(new ChatComponentText("Unknown effect: " + effectName));
                     return;
                 }
-                mod.setSelectedEffect(effectName);
-                mod.setRandomMode(false);
-                sender.addChatMessage(new ChatComponentText("Effect set to: " + effectName));
+                cfg.setSelectedEffect(effectName);
+                cfg.setRandomMode(false);
+                sender.addChatMessage(new ChatComponentText("Effect set to: " + effect.getName()));
                 break;
 
             case "random":
-                mod.setRandomMode(true);
+                cfg.setRandomMode(true);
                 sender.addChatMessage(new ChatComponentText("Random mode enabled"));
                 break;
 
             case "players":
-                mod.setPlayersOnly(!BloodKillEffectMod.playersOnly);
+                cfg.setPlayersOnly(!cfg.isPlayersOnly());
                 sender.addChatMessage(new ChatComponentText(
-                    "Players only: " + (BloodKillEffectMod.playersOnly ? "ON" : "OFF")));
+                    "Players only: " + (cfg.isPlayersOnly() ? "ON" : "OFF")));
                 break;
 
             case "mykills":
-                mod.setKilledByPlayerOnly(!BloodKillEffectMod.killedByPlayerOnly);
+                cfg.setKilledByPlayerOnly(!cfg.isKilledByPlayerOnly());
                 sender.addChatMessage(new ChatComponentText(
-                    "My kills only: " + (BloodKillEffectMod.killedByPlayerOnly ? "ON" : "OFF")));
+                    "My kills only: " + (cfg.isKilledByPlayerOnly() ? "ON" : "OFF")));
                 break;
 
             case "pvp":
-                mod.setPvpOnly(!BloodKillEffectMod.pvpOnly);
+                cfg.setPvpOnly(!cfg.isPvpOnly());
                 sender.addChatMessage(new ChatComponentText(
-                    "PvP only: " + (BloodKillEffectMod.pvpOnly ? "ON" : "OFF")));
+                    "PvP only: " + (cfg.isPvpOnly() ? "ON" : "OFF")));
                 break;
 
             case "tier":
@@ -77,7 +80,7 @@ public class KillEffectCommand extends CommandBase {
                     return;
                 }
                 PerformanceTier tier = PerformanceTier.fromString(args[1]);
-                mod.setPerformanceTier(tier);
+                cfg.setPerformanceTier(tier);
                 sender.addChatMessage(new ChatComponentText(
                     "Performance tier set to: " + tier.getDisplayName()));
                 break;
@@ -90,12 +93,13 @@ public class KillEffectCommand extends CommandBase {
                 sender.addChatMessage(new ChatComponentText("=== Tiers ==="));
                 for (PerformanceTier t : PerformanceTier.values()) {
                     sender.addChatMessage(new ChatComponentText(
-                        "  - " + t.getDisplayName() + " (scale: " + t.getParticleScale() + "x)"));
+                        "  - " + t.name() + " (scale: " + t.getParticleScale() + "x)"));
                 }
                 break;
 
             case "config":
-                sender.addChatMessage(new ChatComponentText("Open GUI: Mods > KillEffect > Config"));
+                // Open the config GUI directly (client-side command)
+                BloodKillEffectMod.proxy.openConfigGui();
                 break;
 
             default:
@@ -108,28 +112,21 @@ public class KillEffectCommand extends CommandBase {
     public int getRequiredPermissionLevel() { return 0; }
 
     @Override
-    public List<String> addTabCompletionOptions(ICommandSender sender, String[] args,
-            net.minecraft.util.BlockPos pos) {
-        List<String> completions = new ArrayList<>();
+    public List<String> addTabCompletionOptions(ICommandSender sender, String[] args, BlockPos pos) {
         if (args.length == 1) {
-            completions.add("toggle");
-            completions.add("effect");
-            completions.add("random");
-            completions.add("tier");
-            completions.add("players");
-            completions.add("mykills");
-            completions.add("pvp");
-            completions.add("list");
-            completions.add("config");
-        } else if (args.length == 2) {
+            return getListOfStringsMatchingLastWord(args,
+                "toggle", "effect", "random", "tier", "players", "mykills", "pvp", "list", "config");
+        }
+        if (args.length == 2) {
             if (args[0].equalsIgnoreCase("effect")) {
-                completions.addAll(EffectRegistry.getAllNames());
-            } else if (args[0].equalsIgnoreCase("tier")) {
-                for (PerformanceTier t : PerformanceTier.values()) {
-                    completions.add(t.name().toLowerCase());
-                }
+                return getListOfStringsMatchingLastWord(args,
+                    EffectRegistry.getAllNames().toArray(new String[0]));
+            }
+            if (args[0].equalsIgnoreCase("tier")) {
+                return getListOfStringsMatchingLastWord(args,
+                    "potato", "balanced", "high", "ultra");
             }
         }
-        return completions;
+        return Collections.emptyList();
     }
 }

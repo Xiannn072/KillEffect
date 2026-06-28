@@ -2,12 +2,13 @@ package io.github.gbui.bloodkilleffect.gui;
 
 import io.github.gbui.bloodkilleffect.BloodKillEffectMod;
 import io.github.gbui.bloodkilleffect.EffectRegistry;
+import io.github.gbui.bloodkilleffect.PerformanceTier;
 import io.github.gbui.bloodkilleffect.config.ConfigManager;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraftforge.common.config.Configuration;
 import net.minecraftforge.common.config.Property;
 import net.minecraftforge.fml.client.config.GuiConfig;
-import net.minecraftforge.fml.client.config.ConfigElement;
+import net.minecraftforge.common.config.ConfigElement;
 import net.minecraftforge.fml.client.config.IConfigElement;
 
 import java.util.ArrayList;
@@ -42,20 +43,23 @@ public class BKEGuiConfig extends GuiConfig {
                 "pvpOnly", false,
                 "Only show effects for player-vs-player kills")));
 
-        // ── Effects category (valid values set on properties before wrapping) ──
-        Property randomProp = cfg.get("Effects", "randomMode", true,
-                "Randomly select from enabled effects");
-        Property selectedProp = cfg.get("Effects", "selectedEffect", "Blood",
+        // ── Effects category ──────────────────────────────────────────────
+        Property selectedProp = cfg.get(ConfigManager.CATEGORY_EFFECTS, "selectedEffect", "Blood",
                 "Selected effect name (used when random mode is off)");
         selectedProp.setValidValues(
                 EffectRegistry.getAllNames().toArray(new String[0]));
-        list.add(new ConfigElement(cfg.getCategory("Effects")));
+        list.add(new ConfigElement(cfg.getCategory(ConfigManager.CATEGORY_EFFECTS)));
 
         // ── Performance category ──────────────────────────────────────────
-        Property tierProp = cfg.get("Performance", "tier", "Balanced",
-                "Performance tier: Potato, Balanced, High Quality, Ultra");
-        tierProp.setValidValues(new String[]{"Potato", "Balanced", "High Quality", "Ultra"});
-        list.add(new ConfigElement(cfg.getCategory("Performance")));
+        Property tierProp = cfg.get(ConfigManager.CATEGORY_PERFORMANCE, "tier",
+                PerformanceTier.BALANCED.name(),
+                "Performance tier: POTATO, BALANCED, HIGH, ULTRA");
+        tierProp.setValidValues(new String[]{
+                PerformanceTier.POTATO.name(),
+                PerformanceTier.BALANCED.name(),
+                PerformanceTier.HIGH.name(),
+                PerformanceTier.ULTRA.name()});
+        list.add(new ConfigElement(cfg.getCategory(ConfigManager.CATEGORY_PERFORMANCE)));
 
         return list;
     }

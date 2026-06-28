@@ -1,23 +1,49 @@
 package io.github.gbui.bloodkilleffect;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.EnumMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+/**
+ * Central registry for kill effects.
+ * Effects are registered once at startup; allowed-effect lists are cached per tier.
+ */
 public class EffectRegistry {
     private static final Map<String, KillEffect> effects = new LinkedHashMap<>();
-    private static final Random random = new Random();
+    private static final Map<PerformanceTier, List<KillEffect>> allowedCache = new EnumMap<>(PerformanceTier.class);
+    private static boolean cached = false;
     private static final Logger logger = LogManager.getLogger("KillEffect|Registry");
 
     public static void register(KillEffect effect) {
         String key = effect.getName().toLowerCase();
         effects.put(key, effect);
         logger.info("Registered kill effect: {}", key);
+    }
+
+    /**
+     * Build the allowed-effect cache for each tier. Call once after all effects
+     * have been registered in preInit.
+     */
+    public static void buildCaches() {
+        allowedCache.clear();
+        for (PerformanceTier tier : PerformanceTier.values()) {
+            List<KillEffect> allowed = new ArrayList<>();
+            for (KillEffect effect : effects.values()) {
+                if (effect.isAllowedInTier(tier)) {
+                    allowed.add(effect);
+                }
+            }
+            allowedCache.put(tier, Collections.unmodifiableList(allowed));
+        }
+        cached = true;
+        logger.info("Effect caches built for {} tiers", allowedCache.size());
     }
 
     public static KillEffect get(String name) {
@@ -40,7 +66,15 @@ public class EffectRegistry {
         return names;
     }
 
+    /**
+     * Returns the cached unmodifiable list of effects allowed for the given tier.
+     * Falls back to computing on-the-fly if buildCaches() was not called.
+     */
     public static List<KillEffect> getAllowed(PerformanceTier tier) {
+        if (cached) {
+            return allowedCache.getOrDefault(tier, Collections.<KillEffect>emptyList());
+        }
+        // Fallback: compute on the fly
         List<KillEffect> allowed = new ArrayList<>();
         for (KillEffect effect : effects.values()) {
             if (effect.isAllowedInTier(tier)) {
@@ -53,7 +87,7 @@ public class EffectRegistry {
     public static KillEffect getRandomAllowed(PerformanceTier tier) {
         List<KillEffect> allowed = getAllowed(tier);
         if (allowed.isEmpty()) return null;
-        return allowed.get(random.nextInt(allowed.size()));
+        return allowed.get(ThreadLocalRandom.current().nextInt(allowed.size()));
     }
 
     /**

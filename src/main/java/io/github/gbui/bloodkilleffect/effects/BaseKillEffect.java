@@ -2,8 +2,9 @@ package io.github.gbui.bloodkilleffect.effects;
 
 import io.github.gbui.bloodkilleffect.KillEffect;
 import io.github.gbui.bloodkilleffect.PerformanceTier;
-import net.minecraft.entity.Entity;
 import net.minecraft.world.World;
+
+import java.util.concurrent.ThreadLocalRandom;
 
 /**
  * Abstract base class for all kill effects.
@@ -45,12 +46,12 @@ public abstract class BaseKillEffect implements KillEffect {
     }
 
     /**
-     * Utility: random offset around an entity center for more natural particle spread.
+     * Utility: random offset around a center for more natural particle spread.
      */
-    protected double randomOffset(java.util.Random rand, double spread) {
-        return (rand.nextDouble() - 0.5) * spread;
+    protected double randomOffset(double spread) {
+        return (ThreadLocalRandom.current().nextDouble() - 0.5) * spread;
     }
 
     @Override
-    public abstract void playEffect(World world, Entity entity, float particleScale);
+    public abstract void playEffect(World world, double x, double y, double z, float particleScale);
 }

@@ -7,15 +7,14 @@ import io.github.gbui.bloodkilleffect.PerformanceTier;
 import net.minecraftforge.common.config.Configuration;
 
 /**
- * Singleton configuration manager. Centralizes all config reads/writes
- * so that {@link BloodKillEffectMod} stays thin.
+ * Singleton configuration manager. THE single source of truth for all config values.
+ * BloodKillEffectMod static fields are removed; all code reads via ConfigManager.get().
  */
 public class ConfigManager {
     private static ConfigManager instance;
 
     private Configuration config;
 
-    // Cached values (mirrors fields on BloodKillEffectMod for backward compat)
     private boolean enabled = true;
     private boolean playersOnly = true;
     private boolean killedByPlayerOnly = false;
@@ -50,9 +49,10 @@ public class ConfigManager {
                 EffectRegistry.getAll().stream().map(KillEffect::getName).toArray(String[]::new));
 
         performanceTier  = PerformanceTier.fromString(
-                config.getString("tier", CATEGORY_PERFORMANCE, "Balanced",
+                config.getString("tier", CATEGORY_PERFORMANCE, PerformanceTier.BALANCED.name(),
                     "Performance tier",
-                    new String[]{"Potato", "Balanced", "High Quality", "Ultra"}));
+                    new String[]{PerformanceTier.POTATO.name(), PerformanceTier.BALANCED.name(),
+                                 PerformanceTier.HIGH.name(), PerformanceTier.ULTRA.name()}));
 
         // Validate selected effect against registry and tier
         if (!randomMode) {
@@ -60,13 +60,8 @@ public class ConfigManager {
             if (effect == null || !effect.isAllowedInTier(performanceTier)) {
                 BloodKillEffectMod.logger.warn("Config: effect '{}' not available, switching to random mode", selectedEffect);
                 randomMode = true;
-                syncToMod();
-                save();
-                return;
             }
         }
-
-        syncToMod();
 
         if (config.hasChanged()) {
             config.save();
@@ -77,60 +72,52 @@ public class ConfigManager {
 
     public void save() {
         if (config == null) return;
-        syncFromMod();
         if (config.hasChanged()) {
             config.save();
         }
     }
 
-    // ── Individual setters (update mod + config + save) ───────────────────
+    // ── Individual setters (update cached value + config file + save) ─────
 
     public void setEnabled(boolean val) {
         this.enabled = val;
-        BloodKillEffectMod.enabled = val;
         config.get(Configuration.CATEGORY_GENERAL, "enabled", true).set(val);
         save();
     }
 
     public void setPlayersOnly(boolean val) {
         this.playersOnly = val;
-        BloodKillEffectMod.playersOnly = val;
         config.get(Configuration.CATEGORY_GENERAL, "playersOnly", true).set(val);
         save();
     }
 
     public void setKilledByPlayerOnly(boolean val) {
         this.killedByPlayerOnly = val;
-        BloodKillEffectMod.killedByPlayerOnly = val;
         config.get(Configuration.CATEGORY_GENERAL, "killedByPlayerOnly", false).set(val);
         save();
     }
 
     public void setPvpOnly(boolean val) {
         this.pvpOnly = val;
-        BloodKillEffectMod.pvpOnly = val;
         config.get(Configuration.CATEGORY_GENERAL, "pvpOnly", false).set(val);
         save();
     }
 
     public void setRandomMode(boolean val) {
         this.randomMode = val;
-        BloodKillEffectMod.randomMode = val;
         config.get(CATEGORY_EFFECTS, "randomMode", true).set(val);
         save();
     }
 
     public void setSelectedEffect(String name) {
         this.selectedEffect = name;
-        BloodKillEffectMod.selectedEffect = name;
         config.get(CATEGORY_EFFECTS, "selectedEffect", "Blood").set(name);
         save();
     }
 
     public void setPerformanceTier(PerformanceTier tier) {
         this.performanceTier = tier;
-        BloodKillEffectMod.performanceTier = tier;
-        config.get(CATEGORY_PERFORMANCE, "tier", "Balanced").set(tier.name());
+        config.get(CATEGORY_PERFORMANCE, "tier", PerformanceTier.BALANCED.name()).set(tier.name());
         save();
     }
 
@@ -145,31 +132,7 @@ public class ConfigManager {
     public String  getSelectedEffect()   { return selectedEffect; }
     public PerformanceTier getPerformanceTier() { return performanceTier; }
 
-    // ── Internal helpers ──────────────────────────────────────────────────
-
-    /** Push cached values into BloodKillEffectMod static fields. */
-    private void syncToMod() {
-        BloodKillEffectMod.enabled          = enabled;
-        BloodKillEffectMod.playersOnly      = playersOnly;
-        BloodKillEffectMod.killedByPlayerOnly = killedByPlayerOnly;
-        BloodKillEffectMod.pvpOnly          = pvpOnly;
-        BloodKillEffectMod.randomMode       = randomMode;
-        BloodKillEffectMod.selectedEffect   = selectedEffect;
-        BloodKillEffectMod.performanceTier  = performanceTier;
-    }
-
-    /** Read current values from BloodKillEffectMod static fields back into cache. */
-    private void syncFromMod() {
-        enabled          = BloodKillEffectMod.enabled;
-        playersOnly      = BloodKillEffectMod.playersOnly;
-        killedByPlayerOnly = BloodKillEffectMod.killedByPlayerOnly;
-        pvpOnly          = BloodKillEffectMod.pvpOnly;
-        randomMode       = BloodKillEffectMod.randomMode;
-        selectedEffect   = BloodKillEffectMod.selectedEffect;
-        performanceTier  = BloodKillEffectMod.performanceTier;
-    }
-
-    // ── Category constants ────────────────────────────────────────────────
-    private static final String CATEGORY_EFFECTS     = "Effects";
-    private static final String CATEGORY_PERFORMANCE = "Performance";
+    // ── Category constants (public for use in BKEGuiConfig) ──────────────
+    public static final String CATEGORY_EFFECTS     = "Effects";
+    public static final String CATEGORY_PERFORMANCE = "Performance";
 }

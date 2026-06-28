@@ -1,33 +1,27 @@
 package io.github.gbui.bloodkilleffect.effects;
 
 import io.github.gbui.bloodkilleffect.PerformanceTier;
-import net.minecraft.entity.Entity;
 import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.world.World;
 
-import java.util.Random;
-
 public class ExplosionEffect extends BaseKillEffect {
-    private static final Random RAND = new Random();
-
     public ExplosionEffect() {
         super("Explosion", PerformanceTier.HIGH);
     }
 
     @Override
-    public void playEffect(World world, Entity entity, float particleScale) {
+    public void playEffect(World world, double x, double y, double z, float particleScale) {
         int count = scaledCount(30, particleScale);
-        double baseX = entity.posX;
-        double baseY = entity.posY + 0.5;
-        double baseZ = entity.posZ;
+        double baseY = y + 0.5;
 
         for (int i = 0; i < count; i++) {
-            double dx = randomOffset(RAND, 0.6);
-            double dy = randomOffset(RAND, 0.6);
-            double dz = randomOffset(RAND, 0.6);
+            double dx = randomOffset(0.6);
+            double dy = randomOffset(0.6);
+            double dz = randomOffset(0.6);
+            // Explosion particles expand outward in all directions
             world.spawnParticle(EnumParticleTypes.EXPLOSION_HUGE,
-                baseX + dx, baseY + dy, baseZ + dz,
-                0, 0, 0);
+                x + dx, baseY + dy, z + dz,
+                dx * 0.1, dy * 0.1, dz * 0.1);
         }
     }
 }
