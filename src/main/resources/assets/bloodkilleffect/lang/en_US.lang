@@ -1,0 +1,11 @@
+bloodkilleffect.configgui.title=KillEffect Configuration
+bloodkilleffect.configgui.enabled=Enabled
+bloodkilleffect.configgui.enabled.tooltip=Enable or disable all kill effects
+bloodkilleffect.configgui.playersOnly=Players Only
+bloodkilleffect.configgui.playersOnly.tooltip=Only show effects when players die
+bloodkilleffect.configgui.randomMode=Random Mode
+bloodkilleffect.configgui.randomMode.tooltip=Randomly select from enabled effects
+bloodkilleffect.configgui.selectedEffect=Selected Effect
+bloodkilleffect.configgui.selectedEffect.tooltip=Effect to use when random mode is off
+bloodkilleffect.configgui.tier=Performance Tier
+bloodkilleffect.configgui.tier.tooltip=Adjust particle count and effect intensity

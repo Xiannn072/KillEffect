@@ -1,0 +1,17 @@
+[
+{
+  "modid": "BloodKillEffect",
+  "name": "KillEffect",
+  "description": "Customizable kill effects for Minecraft",
+  "version": "1.0.0",
+  "mcversion": "1.8.9",
+  "logoFile": "",
+  "url": "https://github.com/gbui/BloodKillEffect",
+  "updateUrl": "",
+  "authors": ["gbui"],
+  "credits": "",
+  "parent": "",
+  "screenshots": [],
+  "dependencies": []
+}
+]
