@@ -1,25 +1,33 @@
 package io.github.gbui.bloodkilleffect.effects;
 
-import io.github.gbui.bloodkilleffect.KillEffect;
 import io.github.gbui.bloodkilleffect.PerformanceTier;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.world.World;
 
-public class FireBurstEffect implements KillEffect {
-    @Override
-    public String getName() { return "Fire"; }
+import java.util.Random;
 
-    @Override
-    public void playEffect(World world, Entity entity, float particleScale) {
-        int count = (int) (20 * particleScale);
-        world.spawnParticle(EnumParticleTypes.FLAME, 
-            entity.posX, entity.posY + 0.5, entity.posZ, 
-            0, 0, 0, count);
+public class FireBurstEffect extends BaseKillEffect {
+    private static final Random RAND = new Random();
+
+    public FireBurstEffect() {
+        super("Fire", PerformanceTier.BALANCED);
     }
 
     @Override
-    public boolean isAllowedInTier(PerformanceTier tier) {
-        return tier != PerformanceTier.POTATO;
+    public void playEffect(World world, Entity entity, float particleScale) {
+        int count = scaledCount(20, particleScale);
+        double baseX = entity.posX;
+        double baseY = entity.posY + 0.5;
+        double baseZ = entity.posZ;
+
+        for (int i = 0; i < count; i++) {
+            double dx = randomOffset(RAND, 0.5);
+            double dy = randomOffset(RAND, 0.5);
+            double dz = randomOffset(RAND, 0.5);
+            world.spawnParticle(EnumParticleTypes.FLAME,
+                baseX + dx, baseY + dy, baseZ + dz,
+                0, 0.05, 0);
+        }
     }
 }

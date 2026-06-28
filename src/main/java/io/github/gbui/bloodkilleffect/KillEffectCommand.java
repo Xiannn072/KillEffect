@@ -123,9 +123,7 @@ public class KillEffectCommand extends CommandBase {
             completions.add("config");
         } else if (args.length == 2) {
             if (args[0].equalsIgnoreCase("effect")) {
-                for (KillEffect e : EffectRegistry.getAll()) {
-                    completions.add(e.getName().toLowerCase());
-                }
+                completions.addAll(EffectRegistry.getAllNames());
             } else if (args[0].equalsIgnoreCase("tier")) {
                 for (PerformanceTier t : PerformanceTier.values()) {
                     completions.add(t.name().toLowerCase());

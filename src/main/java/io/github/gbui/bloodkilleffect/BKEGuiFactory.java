@@ -1,7 +1,9 @@
 package io.github.gbui.bloodkilleffect;
 
+import io.github.gbui.bloodkilleffect.gui.BKEGuiConfig;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraftforge.fml.client.IModGuiFactory;
+
 import java.util.Set;
 
 public class BKEGuiFactory implements IModGuiFactory {
@@ -10,7 +12,7 @@ public class BKEGuiFactory implements IModGuiFactory {
 
     @Override
     public Class<? extends GuiScreen> mainConfigGuiClass() {
-        return null;
+        return BKEGuiConfig.class;
     }
 
     @Override
